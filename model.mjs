@@ -8,6 +8,7 @@ import {
   oneOf,
   plainObject,
 } from "../shared/core.mjs";
+import {makeLearningReport} from "../shared/experience.mjs";
 
 export const FRACTION_FARM_APP_ID = "fraction-farm";
 export const FRACTION_FARM_CONTENT_VERSION = "fraction-farm-core-1";
@@ -38,6 +39,7 @@ export class FractionFarmSession {
       current: null,
       related: null,
       attemptsForPlot: 0,
+      attempts: 0,
       firstTry: 0,
       stars: 0,
     };
@@ -75,10 +77,27 @@ export class FractionFarmSession {
     return clone(this.#state);
   }
 
+  get report() {
+    return makeLearningReport({
+      appId: FRACTION_FARM_APP_ID,
+      audience: this.#state.grade === 4 ? "grade-4" : "grade-4-5",
+      phase: this.#state.phase,
+      stars: this.#state.stars,
+      score: this.#state.firstTry * 10 + (this.#state.phase === "done" ? this.#state.stars * 100 : 0),
+      firstTry: this.#state.firstTry,
+      attempts: this.#state.attempts,
+      hintsUsed: 0,
+      remaining: this.#state.plots.length - this.#state.index,
+      objectives: ["Shade, compare, order, and add visual fractions."],
+      details: {plotsSolved: this.#state.plots.filter(plot => plot.solved).length},
+    });
+  }
+
   answer(value) {
     if (this.#state.phase !== "task") throw Error("No fraction task is ready.");
     const task = this.#state.current, firstAttempt = this.#state.attemptsForPlot === 0;
     this.#state.attemptsForPlot++;
+    this.#state.attempts++;
     const correct = task.kind === "shade" ? value === task.target :
       task.kind === "compare" ? value === task.answer : value === task.answerIndex;
     if (!correct) {
@@ -293,10 +312,10 @@ function validTask(task, grade) {
 
 function validatePayload(state) {
   if (!exactKeys(state, ["version", "seed", "rngState", "grade", "phase", "plots", "index", "current", "related",
-    "attemptsForPlot", "firstTry", "stars"]) || state.version !== FRACTION_FARM_CONTENT_VERSION ||
+    "attemptsForPlot", "attempts", "firstTry", "stars"]) || state.version !== FRACTION_FARM_CONTENT_VERSION ||
     typeof state.seed !== "string" || !integer(state.rngState, 0, 0xffffffff) || !oneOf(state.grade, [4, 5]) ||
     !oneOf(state.phase, ["task", "explain", "done"]) || !Array.isArray(state.plots) || state.plots.length !== 12 ||
-    !integer(state.index, 0, 12) || !integer(state.attemptsForPlot, 0, 1000) ||
+    !integer(state.index, 0, 12) || !integer(state.attemptsForPlot, 0, 1000) || !integer(state.attempts, 0, 10000) ||
     !integer(state.firstTry, 0, 12) || !integer(state.stars, 0, 3)) throw Error("Invalid Fraction Farm snapshot.");
   state.plots.forEach((plot, index) => {
     if (!exactKeys(plot, ["kind", "solved", "firstTry"]) || plot.kind !== PLOT_KINDS[index] ||
