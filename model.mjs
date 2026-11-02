@@ -40,6 +40,7 @@ export class FractionFarmSession {
       related: null,
       attemptsForPlot: 0,
       attempts: 0,
+      hintsUsed: 0,
       firstTry: 0,
       stars: 0,
     };
@@ -73,6 +74,10 @@ export class FractionFarmSession {
     return this.#state.stars;
   }
 
+  get hintsUsed() {
+    return this.#state.hintsUsed;
+  }
+
   get state() {
     return clone(this.#state);
   }
@@ -86,7 +91,7 @@ export class FractionFarmSession {
       score: this.#state.firstTry * 10 + (this.#state.phase === "done" ? this.#state.stars * 100 : 0),
       firstTry: this.#state.firstTry,
       attempts: this.#state.attempts,
-      hintsUsed: 0,
+      hintsUsed: this.#state.hintsUsed,
       remaining: this.#state.plots.length - this.#state.index,
       objectives: ["Shade, compare, order, and add visual fractions."],
       details: {plotsSolved: this.#state.plots.filter(plot => plot.solved).length},
@@ -124,6 +129,22 @@ export class FractionFarmSession {
       this.#state.rngState = this.#rng.state;
     }
     return {correct: true, done: this.#state.phase === "done", stars: this.#state.stars};
+  }
+
+  hint() {
+    const task = this.#state.current;
+    if (this.#state.phase !== "task" || !Array.isArray(task.choices) || task.choices.length <= 2) return null;
+    const answer = task.kind === "shade" ? task.target :
+      task.kind === "compare" ? task.answer : task.choices[task.answerIndex];
+    const wrong = task.choices.filter(value => JSON.stringify(value) !== JSON.stringify(answer));
+    const removed = this.#rng.pick(wrong);
+    task.choices = task.choices.filter(value => JSON.stringify(value) !== JSON.stringify(removed));
+    if (task.kind !== "compare" && task.kind !== "shade") {
+      task.answerIndex = task.choices.findIndex(value => JSON.stringify(value) === JSON.stringify(answer));
+    }
+    this.#state.hintsUsed++;
+    this.#state.rngState = this.#rng.state;
+    return removed;
   }
 
   continueAfterMiss() {
@@ -273,7 +294,7 @@ function validTask(task, grade) {
   }
   if (task.kind === "equal") {
     return exactKeys(task, ["kind", "fraction", "choices", "answerIndex", "answer", "denominator", "target"]) &&
-      validFraction(task.fraction, maxDenominator) && Array.isArray(task.choices) && task.choices.length === 3 &&
+      validFraction(task.fraction, maxDenominator) && Array.isArray(task.choices) && task.choices.length >= 2 && task.choices.length <= 3 &&
       task.choices.every(value => validFraction(value, maxDenominator)) &&
       integer(task.answerIndex, 0, 2) && task.answer === null && task.denominator === null && task.target === null &&
       task.choices.filter(value => compareFractions(value, task.choices[task.answerIndex]) === 0).length === 1;
@@ -281,7 +302,9 @@ function validTask(task, grade) {
   if (task.kind === "compare") {
     return exactKeys(task, ["kind", "left", "right", "choices", "answer", "answerIndex", "denominator", "target", "fraction"]) &&
       validFraction(task.left, maxDenominator) && validFraction(task.right, maxDenominator) &&
-      JSON.stringify(task.choices) === JSON.stringify(["<", "=", ">"]) &&
+      Array.isArray(task.choices) && task.choices.length >= 2 && task.choices.length <= 3 &&
+      task.choices.every(choice => ["<", "=", ">"].includes(choice)) &&
+      new Set(task.choices).size === task.choices.length && task.choices.includes(task.answer) &&
       task.answer === (compareFractions(task.left, task.right) < 0 ? "<" : compareFractions(task.left, task.right) > 0 ? ">" : "=") &&
       task.answerIndex === null && task.denominator === null && task.target === null && task.fraction === null;
   }
@@ -289,7 +312,7 @@ function validTask(task, grade) {
     return exactKeys(task, ["kind", "fractions", "choices", "answerIndex", "answer", "denominator", "target", "left", "right"]) &&
       Array.isArray(task.fractions) && task.fractions.length === 3 && task.fractions.every(value => validFraction(value, maxDenominator)) &&
       task.fractions.every((value, index) => index === 0 || compareFractions(task.fractions[index - 1], value) < 0) &&
-      Array.isArray(task.choices) && task.choices.length === 3 &&
+      Array.isArray(task.choices) && task.choices.length >= 2 && task.choices.length <= 3 &&
       task.choices.every(order => Array.isArray(order) && order.length === 3 && order.every(value => validFraction(value, maxDenominator))) &&
       task.choices.every(order => order.every(value => task.fractions.some(correct => fractionKey(correct) === fractionKey(value)))) &&
       task.choices.filter(order => order.every((value, index) => fractionKey(value) === fractionKey(task.fractions[index]))).length === 1 &&
@@ -301,7 +324,7 @@ function validTask(task, grade) {
   const totalScaled = leftScaled === null || rightScaled === null ? null : leftScaled + rightScaled;
   return exactKeys(task, ["kind", "left", "right", "choices", "answerIndex", "answer", "denominator", "target", "fraction", "fractions"]) &&
     validFraction(task.left, maxDenominator) && validFraction(task.right, maxDenominator) &&
-    integer(task.denominator, 2, maxDenominator) && Array.isArray(task.choices) && task.choices.length === 3 &&
+    integer(task.denominator, 2, maxDenominator) && Array.isArray(task.choices) && task.choices.length >= 2 && task.choices.length <= 3 &&
     task.choices.every(value => validFraction(value, maxDenominator)) && integer(task.answerIndex, 0, 2) &&
     totalScaled !== null &&
     task.choices.filter(value => value.numerator * task.denominator === totalScaled * value.denominator).length === 1 &&
@@ -312,10 +335,11 @@ function validTask(task, grade) {
 
 function validatePayload(state) {
   if (!exactKeys(state, ["version", "seed", "rngState", "grade", "phase", "plots", "index", "current", "related",
-    "attemptsForPlot", "attempts", "firstTry", "stars"]) || state.version !== FRACTION_FARM_CONTENT_VERSION ||
+    "attemptsForPlot", "attempts", "hintsUsed", "firstTry", "stars"]) || state.version !== FRACTION_FARM_CONTENT_VERSION ||
     typeof state.seed !== "string" || !integer(state.rngState, 0, 0xffffffff) || !oneOf(state.grade, [4, 5]) ||
     !oneOf(state.phase, ["task", "explain", "done"]) || !Array.isArray(state.plots) || state.plots.length !== 12 ||
     !integer(state.index, 0, 12) || !integer(state.attemptsForPlot, 0, 1000) || !integer(state.attempts, 0, 10000) ||
+    !integer(state.hintsUsed, 0, 10000) ||
     !integer(state.firstTry, 0, 12) || !integer(state.stars, 0, 3)) throw Error("Invalid Fraction Farm snapshot.");
   state.plots.forEach((plot, index) => {
     if (!exactKeys(plot, ["kind", "solved", "firstTry"]) || plot.kind !== PLOT_KINDS[index] ||
