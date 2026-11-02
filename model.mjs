@@ -235,8 +235,13 @@ function starCount(firstTry) {
 }
 
 function validFraction(value, maxDenominator = 12) {
-  return exactKeys(value, ["numerator", "denominator"]) && integer(value.numerator, 0, 24) &&
-    integer(value.denominator, 1, maxDenominator) && gcd(value.numerator, value.denominator) === 1;
+  return exactKeys(value, ["numerator", "denominator"]) && integer(value.numerator, 1, 24) &&
+    integer(value.denominator, 2, maxDenominator) && gcd(value.numerator, value.denominator) === 1;
+}
+
+function scaledTo(value, denominator) {
+  const product = value.numerator * denominator;
+  return product % value.denominator === 0 ? product / value.denominator : null;
 }
 
 function validTask(task, grade) {
@@ -273,17 +278,17 @@ function validTask(task, grade) {
       task.choices[task.answerIndex].every((value, index) => fractionKey(value) === fractionKey(task.fractions[index])) &&
       task.answer === null && task.denominator === null && task.target === null && task.left === null && task.right === null;
   }
+  const leftScaled = scaledTo(task.left, task.denominator), rightScaled = scaledTo(task.right, task.denominator);
+  const totalScaled = leftScaled === null || rightScaled === null ? null : leftScaled + rightScaled;
   return exactKeys(task, ["kind", "left", "right", "choices", "answerIndex", "answer", "denominator", "target", "fraction", "fractions"]) &&
     validFraction(task.left, maxDenominator) && validFraction(task.right, maxDenominator) &&
     integer(task.denominator, 2, maxDenominator) && Array.isArray(task.choices) && task.choices.length === 3 &&
     task.choices.every(value => validFraction(value, maxDenominator)) && integer(task.answerIndex, 0, 2) &&
-    task.choices.filter(value => value.numerator * task.denominator ===
-      (task.left.numerator * task.denominator / task.left.denominator + task.right.numerator * task.denominator / task.right.denominator) * value.denominator).length === 1 &&
-    task.choices[task.answerIndex].numerator * task.denominator ===
-      (task.left.numerator * task.denominator / task.left.denominator + task.right.numerator * task.denominator / task.right.denominator) * task.choices[task.answerIndex].denominator &&
+    totalScaled !== null &&
+    task.choices.filter(value => value.numerator * task.denominator === totalScaled * value.denominator).length === 1 &&
+    task.choices[task.answerIndex].numerator * task.denominator === totalScaled * task.choices[task.answerIndex].denominator &&
     task.answer === null && task.target === null && task.fraction === null && task.fractions === null &&
-    (grade === 5 || task.left.numerator * task.denominator / task.left.denominator +
-      task.right.numerator * task.denominator / task.right.denominator <= task.denominator);
+    (grade === 5 ? totalScaled <= task.denominator * 2 : totalScaled <= task.denominator);
 }
 
 function validatePayload(state) {

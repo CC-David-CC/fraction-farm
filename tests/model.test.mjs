@@ -54,6 +54,21 @@ test("grade-four addition never exceeds one whole", () => {
   }
 });
 
+test("grade-five addition stays within two wholes", () => {
+  for (let seed = 0; seed < 80; seed++) {
+    const session = new FractionFarmSession(`sum-cap-${seed}`, 5);
+    while (session.phase !== "done") {
+      const task = session.current;
+      if (task.kind === "add") {
+        const left = task.left.numerator * task.denominator / task.left.denominator;
+        const right = task.right.numerator * task.denominator / task.right.denominator;
+        assert.ok(left + right <= task.denominator * 2);
+      }
+      session.answer(correctAnswer(task));
+    }
+  }
+});
+
 test("wrong answers preserve the plot, explain, and re-ask the same kind", () => {
   const session = new FractionFarmSession("miss", 4);
   const index = session.index, kind = session.current.kind;
