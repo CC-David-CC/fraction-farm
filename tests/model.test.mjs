@@ -39,6 +39,18 @@ test("equivalent choices use exact canonical comparison", () => {
   assert.equal(selected.numerator * task.fraction.denominator, selected.denominator * task.fraction.numerator);
 });
 
+test("hints remove one wrong choice and keep the correct choice index valid", () => {
+  const session = new FractionFarmSession("hint", 5);
+  while (session.current.kind !== "equal") session.answer(correctAnswer(session.current));
+  const answer = session.current.choices[session.current.answerIndex];
+  const removed = session.hint();
+  assert.ok(removed);
+  assert.notDeepEqual(removed, answer);
+  assert.equal(session.current.choices.length, 2);
+  assert.deepEqual(session.current.choices[session.current.answerIndex], answer);
+  assert.equal(session.hint(), null);
+});
+
 test("grade-four addition never exceeds one whole", () => {
   for (let seed = 0; seed < 80; seed++) {
     const session = new FractionFarmSession(`sum-bound-${seed}`, 4);
@@ -109,6 +121,8 @@ test("malformed fractions and tasks are rejected", () => {
     value => { value.payload.current.denominator = 1; },
     value => { value.payload.plots[0].kind = "equal"; },
     value => { value.payload.index = 12; },
+    value => { value.payload.hintsUsed = -1; },
+    value => { value.payload.current.choices = [value.payload.current.choices[value.payload.current.answerIndex]]; },
   ]) {
     const broken = structuredClone(valid);
     mutate(broken);
