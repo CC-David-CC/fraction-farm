@@ -11,7 +11,7 @@ import {
 import {makeLearningReport} from "../shared/experience.mjs";
 
 export const FRACTION_FARM_APP_ID = "fraction-farm";
-export const FRACTION_FARM_CONTENT_VERSION = "fraction-farm-core-1";
+export const FRACTION_FARM_CONTENT_VERSION = "fraction-farm-core-2";
 const PLOT_KINDS = ["shade", "equal", "compare", "add", "shade", "equal", "compare", "add", "order", "shade", "equal", "add"];
 const TASK_KINDS = ["shade", "equal", "compare", "order", "add"];
 
