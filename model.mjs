@@ -7,8 +7,8 @@ import {
   integer,
   oneOf,
   plainObject,
-} from "../shared/core.mjs";
-import {makeLearningReport} from "../shared/experience.mjs";
+} from "@webos/learning-game-core/core";
+import {makeLearningReport} from "@webos/learning-game-core/experience";
 
 export const FRACTION_FARM_APP_ID = "fraction-farm";
 export const FRACTION_FARM_CONTENT_VERSION = "fraction-farm-core-2";
