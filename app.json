@@ -1,0 +1,15 @@
+{
+  "id": "fraction-farm",
+  "name": "Fraction Farm",
+  "category": "Games",
+  "version": "0.1.0",
+  "description": "Educational fraction arithmetic puzzle where players plant and divide crops across fractionally partitioned fields.",
+  "entry": "index.mjs",
+  "window": {
+    "title": "Fraction Farm",
+    "width": 880,
+    "height": 640,
+    "minWidth": 360,
+    "minHeight": 420
+  }
+}

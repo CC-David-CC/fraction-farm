@@ -1,0 +1,271 @@
+:root {
+  --farm-bg: #f4fbf0;
+  --farm-card-bg: #ffffff;
+  --farm-border: #c8e6c9;
+  --farm-text: #1b381e;
+  --farm-accent: #2e7d32;
+  --farm-accent-light: #a5d6a7;
+  --farm-active-plot: #fff9c4;
+  --farm-solved-plot: #e8f5e9;
+  --farm-touch-target: 44px;
+}
+
+.fraction-farm-app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: var(--farm-bg);
+  color: var(--farm-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+  padding: 12px;
+  gap: 12px;
+  overflow: auto;
+}
+
+.farm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--farm-border);
+}
+
+.farm-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--farm-accent);
+}
+
+.farm-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.farm-badge {
+  background: #ffffff;
+  border: 1px solid var(--farm-border);
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.farm-grade-select {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--farm-border);
+  font-weight: 600;
+  background: white;
+}
+
+.farm-main {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
+
+.farm-plots-section {
+  flex: 1 1 360px;
+  background: var(--farm-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--farm-border);
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.farm-plot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.farm-plot {
+  aspect-ratio: 1;
+  background: #fafafa;
+  border: 2px dashed #b0bec5;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.farm-plot.active {
+  background: var(--farm-active-plot);
+  border: 2px solid #fbc02d;
+  box-shadow: 0 0 6px rgba(251, 192, 45, 0.4);
+}
+
+.farm-plot.solved {
+  background: var(--farm-solved-plot);
+  border: 2px solid #4caf50;
+}
+
+.farm-workbench {
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.farm-card {
+  background: var(--farm-card-bg);
+  border: 1px solid var(--farm-border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.task-title {
+  margin-top: 0;
+  font-size: 1rem;
+  color: var(--farm-accent);
+}
+
+.farm-fraction-bar {
+  display: flex;
+  height: 60px;
+  border: 2px solid var(--farm-accent);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.fraction-segment {
+  flex: 1;
+  background: #f1f8e9;
+  border: none;
+  border-right: 1px solid var(--farm-accent);
+  cursor: pointer;
+  min-height: var(--farm-touch-target);
+  transition: background 0.15s ease;
+}
+
+.fraction-segment:last-child {
+  border-right: none;
+}
+
+.fraction-segment.shaded {
+  background: #66bb6a;
+}
+
+.farm-choices-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.farm-choice-btn {
+  min-height: var(--farm-touch-target);
+  background: #ffffff;
+  border: 2px solid var(--farm-border);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: all 0.15s ease;
+}
+
+.farm-choice-btn:hover {
+  background: #e8f5e9;
+  border-color: var(--farm-accent);
+}
+
+.farm-btn {
+  min-height: var(--farm-touch-target);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.farm-btn-primary {
+  background: var(--farm-accent);
+  color: white;
+}
+
+.farm-btn-secondary {
+  background: #e8f5e9;
+  color: var(--farm-accent);
+  border: 1px solid var(--farm-accent-light);
+}
+
+.farm-btn-outline {
+  background: transparent;
+  color: var(--farm-text);
+  border: 1px solid #b0bec5;
+}
+
+.farm-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Tier 1: Phone (< 768px) */
+@media (max-width: 768px) {
+  .fraction-farm-app {
+    padding: 8px;
+    gap: 8px;
+  }
+  .farm-main {
+    flex-direction: column;
+  }
+  .farm-plots-section {
+    flex: 0 0 auto;
+  }
+  .farm-plot-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .farm-choice-btn {
+    min-height: 48px;
+  }
+}
+
+/* Tier 2: 1080p Desktop (1024px to 2559px) */
+@media (min-width: 1024px) and (max-width: 2559px) {
+  .farm-plots-section {
+    flex: 0 0 380px;
+  }
+  .farm-workbench {
+    flex: 1;
+  }
+}
+
+/* Tier 3: 4K UHD (>= 2560px) */
+@media (min-width: 2560px) {
+  :root {
+    --farm-touch-target: 56px;
+  }
+  .fraction-farm-app {
+    padding: 24px;
+    gap: 20px;
+    font-size: 1.3rem;
+  }
+  .farm-title {
+    font-size: 2rem;
+  }
+  .farm-plot-grid {
+    gap: 16px;
+  }
+  .farm-choice-btn {
+    font-size: 1.6rem;
+    padding: 16px;
+  }
+  .farm-fraction-bar {
+    height: 90px;
+  }
+}
