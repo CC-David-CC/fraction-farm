@@ -1,3 +1,4 @@
+import {connectGameFiles} from '@webos/learning-game-core/workspace';
 import {FractionFarmSession} from './model.mjs';
 import {computeLayout} from './layout.mjs';
 
@@ -249,6 +250,20 @@ export function mount(host, options = {}) {
     renderWorkbench();
   }
 
+  const files = connectGameFiles(host, {
+    header,
+    id: 'fraction-farm',
+    title: 'Fraction Farm',
+    serialize: () => session.encodeSave(),
+    restore(snapshot) {
+      session = FractionFarmSession.fromSave(snapshot);
+      grade = session.state.grade;
+      gradeSelect.value = String(grade);
+      shadedCount = 0;
+      render();
+    },
+  });
+
   render();
 
   if (typeof ResizeObserver !== 'undefined' && root.getBoundingClientRect) {
@@ -262,8 +277,11 @@ export function mount(host, options = {}) {
 
   return {
     element: root,
-    session,
+    get session() { return session; },
+    ready: files.ready,
+    requestClose: files.requestClose,
     dispose() {
+      files.dispose?.();
       disposed = true;
       resizeObserver?.disconnect();
       resizeObserver = null;
