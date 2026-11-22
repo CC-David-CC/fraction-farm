@@ -36,7 +36,7 @@ function createElement(host, tag, className, text) {
 }
 
 export function mount(host, options = {}) {
-  const root = createElement(host, 'div', 'fraction-farm-app');
+  const root = createElement(host, 'div', 'window-content fraction-farm-app');
 
   let grade = options.grade || 4;
   let session = new FractionFarmSession(`farm-${Date.now()}`, grade);
