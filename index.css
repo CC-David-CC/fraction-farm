@@ -43,6 +43,7 @@
 
 .farm-stats {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
@@ -215,57 +216,58 @@
   justify-content: flex-end;
 }
 
-/* Tier 1: Phone (< 768px) */
-@media (max-width: 768px) {
-  .fraction-farm-app {
-    padding: 8px;
-    gap: 8px;
-  }
-  .farm-main {
-    flex-direction: column;
-  }
-  .farm-plots-section {
-    flex: 0 0 auto;
-  }
-  .farm-plot-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-  .farm-choice-btn {
-    min-height: 48px;
-  }
+.fraction-farm-app[data-tier="phone"] {
+  padding: 8px;
+  gap: 8px;
 }
 
-/* Tier 2: 1080p Desktop (1024px to 2559px) */
-@media (min-width: 1024px) and (max-width: 2559px) {
-  .farm-plots-section {
-    flex: 0 0 380px;
-  }
-  .farm-workbench {
-    flex: 1;
-  }
+.fraction-farm-app[data-tier="phone"] .farm-main {
+  flex-direction: column;
 }
 
-/* Tier 3: 4K UHD (>= 2560px) */
-@media (min-width: 2560px) {
-  :root {
-    --farm-touch-target: 56px;
-  }
-  .fraction-farm-app {
-    padding: 24px;
-    gap: 20px;
-    font-size: 1.3rem;
-  }
-  .farm-title {
-    font-size: 2rem;
-  }
-  .farm-plot-grid {
-    gap: 16px;
-  }
-  .farm-choice-btn {
-    font-size: 1.6rem;
-    padding: 16px;
-  }
-  .farm-fraction-bar {
-    height: 90px;
-  }
+.fraction-farm-app[data-tier="phone"] .farm-plots-section {
+  flex: 0 0 auto;
+}
+
+.fraction-farm-app[data-tier="phone"] .farm-plot-grid {
+  grid-template-columns: repeat(auto-fit, minmax(66px, 1fr));
+}
+
+.fraction-farm-app[data-tier="phone"] .farm-choice-btn {
+  min-height: 48px;
+}
+
+.fraction-farm-app[data-tier="desktop"] .farm-plots-section {
+  flex: 0 0 380px;
+}
+
+.fraction-farm-app[data-tier="desktop"] .farm-workbench {
+  flex: 1;
+}
+
+.fraction-farm-app[data-tier="4k"] {
+  --farm-touch-target: 56px;
+}
+
+.fraction-farm-app[data-tier="4k"] {
+  padding: 24px;
+  gap: 20px;
+  font-size: 1.3rem;
+}
+
+.fraction-farm-app[data-tier="4k"] .farm-title {
+  font-size: 2rem;
+}
+
+.fraction-farm-app[data-tier="4k"] .farm-plot-grid {
+  gap: 16px;
+}
+
+.fraction-farm-app[data-tier="4k"] .farm-choice-btn {
+  font-size: 1.6rem;
+  padding: 16px;
+}
+
+.fraction-farm-app[data-tier="4k"] .farm-fraction-bar {
+  height: 90px;
 }
